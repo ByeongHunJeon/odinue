@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+	<mapper namespace="edu.hun86.model">
+		
+		<select id="allList" parameterType="EduDto" resultType="EduDto">
+			SELECT ROWNUM,SEQ,NAME,TITLE,CONTENT,REGDATE,MODIDATE,CHKABLE
+			FROM (SELECT SEQ,NAME,TITLE,CONTENT,REGDATE,MODIDATE,CHKABLE FROM BOARD ORDER BY SEQ DESC) 
+			WHERE ROWNUM BETWEEN #{sNum} AND #{eNum}
+			ORDER BY SEQ DESC
+		</select>
+		
+		<select id="pageCount" resultType="Integer">
+			SELECT CEIL(COUNT(*)/10) AS COUNT FROM BOARD
+		</select>
+		
+		<select id="detailBoard" parameterType="EduDto" resultType="EduDto">
+			SELECT SEQ,NAME,TITLE,CONTENT,REGDATE,MODIDATE,CHKABLE FROM BOARD WHERE SEQ=#{seq}
+		</select>
+		
+		<insert id="insertBoard" parameterType="EduDto">
+			INSERT INTO BOARD(SEQ,NAME,TITLE,CONTENT,REGDATE,MANAGER)
+			VALUES(BOARD_SEQ.NEXTVAL,#{name},#{title},#{content},SYSDATE,(SELECT M_NAME FROM MEMBERS WHERE M_SEQ=#{m_seq}))
+		</insert>
+		
+		<update id="updateBoard" parameterType="EduDto">
+			UPDATE BOARD SET 
+			<choose>
+				<when test="title!=null">
+					TITLE=#{title} ,
+				</when>
+				<when test="content!=null">
+					CONTENT=#{content} ,
+				</when>
+				<when test="manager!=null">
+					 MANAGER=#{manager} ,
+				</when>
+			</choose>
+			  MODIDATE=SYSDATE WHERE SEQ=#{seq}
+		</update>
+		
+		<update id="chkBoard" parameterType="integer">
+			UPDATE BOARD SET CHKABLE='Y' WHERE SEQ=#{seq}
+		</update>
+		
+		<delete id="deleteBoard" parameterType="integer">
+			DELETE FROM BOARD WHERE SEQ=#{seq}
+		</delete>
+		
+	</mapper>
